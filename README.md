@@ -25,6 +25,7 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-03-23: Due to kernel 4.9.206: Soundcard AML-AUGESOUND changed to AML-AUGESOUND-V.   
 2020-03-23: Correct partition name variables as a final OTA fix.  
 2020-04-01: Updated Khadas u-boot scripts and boot.ini  
+2020-04-03: Optimized boot parameter handling, adding boot logo  
 
 
 
