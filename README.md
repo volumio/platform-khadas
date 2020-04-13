@@ -26,6 +26,8 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-03-23: Correct partition name variables as a final OTA fix.  
 2020-04-01: Updated Khadas u-boot scripts and boot.ini  
 2020-04-03: Optimized boot parameter handling, adding boot logo  
+2020-04-13: Identical AML-AUGESOUND-V config for VIM3 and VIM3L  
+
 
 
 
