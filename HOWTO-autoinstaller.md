@@ -38,7 +38,9 @@ Make sure **VER** and **DAT** have the values from the image to download.
  
 This step needs to be done every time a new Krescue Autoinstaller needs to be created.  
 
-Note, building an Autoinstaller does not have to be done for every VIM3L volumio image version. You can use an older version and do an OTA update.  
+Note 1: building an Autoinstaller does not have to be done for every VIM3L volumio image version. You can use an older version and do an OTA update.  
+
+Note 2: Replace the logo.bmp in VOLUMIO.krescue/BOOT when a different version is to be used.  
 
 	cd khadas-rescue-tools
 	sudo rm -r img

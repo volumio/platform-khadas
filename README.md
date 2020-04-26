@@ -29,6 +29,8 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-04-13: Identical AML-AUGESOUND-V config for VIM3 and VIM3L  
 2020-04-14: Optimized cpu frequency scaling with new rc.local script
 2020-04-14: Optimized IRQ cpu affinity  
+2020-04-26: Temporary fix for reboot crash/ enabling Khadas remote  
+
 
 
 
