@@ -31,6 +31,7 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-04-14: Optimized IRQ cpu affinity  
 2020-04-26: Temporary fix for reboot crash/ enabling Khadas remote  
 2020-04-27: Updated Auto Installer HOW-TO
+2020-04-27: Temporary disable mcu poweroff for VIM3L/mp1  
 
 
 
