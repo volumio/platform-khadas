@@ -33,6 +33,8 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-04-27: Updated Auto Installer HOW-TO
 2020-04-27: Temporary disable mcu poweroff for VIM3L/mp1  
 2020-07-21: Replaced VIM3L u-boot with the latest from kresc  
+2020-07-21: Make Kresc Autoinstaller: obsolete, replaced by Volumio generic  
+
 
 
 
