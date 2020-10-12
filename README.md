@@ -35,6 +35,7 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-07-21: Replaced VIM3L u-boot with the latest from kresc  
 2020-07-21: Make Kresc Autoinstaller: obsolete, replaced by Volumio generic  
 2020-08-02: Added support for snd-aloop (alsa loop device)  
+2020-10-12: Correct installer boot from android uboot environment  
 
 
 
