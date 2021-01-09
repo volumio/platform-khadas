@@ -38,6 +38,8 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-10-12: Correct installer boot from android uboot environment  
 2020-10-13: Correct empty KERNEL_ADDR  
 2020-10-15: Boot env: Modification for handling GPIOH_4 (pin37)  
+2021-01-09: Change AUGE_SOUND_V sound cardname to AUGE_SOUND_MP1 for VIM3L  
+
 
 
 
