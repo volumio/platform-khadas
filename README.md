@@ -2,7 +2,7 @@
 Contains all the khadas-specific kernel and build files
 
 kernel: http://github.com/khadas/linux
-branch: khadas-vims-4.9
+branch: khadas-vims-4.9.206
 
 uboot: https://github.com/hyphop/khadas-uboot-spi/releases/tag/vims
 alternative: http://github.com/khadas/u-boot
@@ -40,6 +40,8 @@ Credits: @hyphop (khadas) and @balbes150 (volumio, armbian, khadas) for some imp
 2020-10-15: Boot env: Modification for handling GPIOH_4 (pin37)
 2021-01-09: Change AUGE_SOUND_V sound cardname to AUGE_SOUND_MP1 for VIM3L
 2021-01-24: Follow card.json card naming as AUGE-SOUND-MP1 and AUGE-SOUND-V for VIM
+2021-09-21: Bumpt to 4.9.206, experimental eARC support, AUGE sound patch and es90x8q2m driver support
+
 
 
 
