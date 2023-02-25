@@ -83,10 +83,10 @@
     * [x] small changes mp1ml (use ".deb"-folder "Khadas", use u-boot binary name "uboot.bin.sd.bin")
     * [x] Optimise boot.cmd (minimal)
 * [x] Remove ohdmi.service (depricated) and fan.service (not necessary)
-* [ ] Add missing services & settings vim3l
-* [ ] Add mainline asound.state for vim3l
-* [ ] Modify initramfs to check for legacy u-boot in "kernel update block" --> replace by mainline u-boot
-* [ ] Debug boot volumio image
+* [x] Add missing services & settings vim3l
+* [x] Add mainline asound.state for vim3l
+* [x] Modify initramfs to check for legacy u-boot in "kernel update block" --> replace by mainline u-boot
+* [x] Debug boot volumio image
 
 **Build recipe for vim1s**
 * [x] Make an mps-family from mp1ml.sh and vim1s.sh
@@ -113,24 +113,22 @@
 **Mainline u-boot boot issue with Volumio updater**
 * [failed] Boot mainline kernel with legacy u-boot
     * [x] System still bootable from sd when update u-boot on emmc crashed? 
-    * [failed] Emergency option vim3l
-        * [ ] fix via bootloader special recover image (only works on booted device).
-        * [ ] u-boot recovery via specific initrd (simplified installer). This is **THE** only feasible and working option.
+    * [not needed] Emergency option vim3l
 
 **Tweaking mp1/vim1s performance (rc.local)**
-* [ ] Set cpufreqs
-* [ ] Set smp-affinity
-* [x] Activate WOL VIM1S
+* [x] Set cpufreqs
+* [x] Set smp-affinity
+* [ ] Activate WOL VIM1S
 * [ ] Activate WOL MP1
 * [ ] Remove console log
-* [ ] Add Plymouth (take fenix settings as sample)
+* [fail] Add Plymouth (take fenix settings as sample)
 
 **Autoinstallers and u-boot recovery for mp1ml**
-* [ ] Create autoinstaller 
-    * [ ] NOTE!!!!: A current 4.9 kernel MP1 device will not be able to "update" to a Kernel 5.0
+* [x] Create autoinstallers
+    * [x] A current 4.9 kernel MP1 device will not be able to "update" to a Kernel 5.0
     This is because it needs a mainline u-boot, we can't change u-boot just with the Volumio updater.
-    It will need a full-proof initramfs fix, not sure how to do that yet.
-* [ ] Create simple u-boot recovery image for mp1ml
+    Received a full-proof initramfs fix. Needs to be activated in 4.9 version before the update.
+
 
 <br />
 <br />
