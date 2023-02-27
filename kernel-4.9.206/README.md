@@ -5,13 +5,108 @@ Contains all the khadas-specific kernel and build files
 They are removed from the u-boot boot script.
 
 ## **Resources**
-kernel: http://github.com/khadas/linux
-branch: khadas-vims-4.9.206
+kernel: **http://github.com/volumio/linux-mp1**  
+(which is based on http://github.com/khadas/linux, branch "khadas-vims-4.9.206")
 
-uboot: https://github.com/hyphop/khadas-uboot-spi/releases/tag/vims
-alternative: http://github.com/khadas/u-boot
+uboot: http://github.com/khadas/u-boot  
+(Build with http://github.com/khadas/fenix)  
 
-hwpacks and other: http://github.com/khadas/fenix
+Alternative location: https://github.com/hyphop/khadas-uboot-spi/releases/tag/vims  
+Board-specific root additions (hwpacks and other): http://github.com/khadas/fenix
+
+
+## **Khadas Kernel**
+
+### **ESS driver**
+  
+The ES90x8Q2M driver sources have been been inserted into the kernel source tree.  
+It compiles, but it is not used as it does not fit the current Khadas audio bus requirements.  
+\<**Some other interface was used to change volume, document to be completed by a core team member**>  
+
+### **VIM3L device tree**
+**General VIM dtb's**  
+We still use copies of decompiled dtb files, originally sent to us by Khadas.
+This is unfortunate as it makes changes more difficult/ complex.
+We still need to compile/decompile the original dts files, compare them to the Khadas versions to see where the differences are nowadays and reflect them in the current dts.  
+I guess, after a number of corrections (since start of the VIM porting), differences are very small, it probably only concerns the 192Kbps issue with I2S.
+
+**Adding more USB Audio DSD devices**  
+The Khadas vendor-based 4.9 kernel is not up-to-date with the latest DSD direct capable USB Audio devices.  
+Add those which were not included yet (take them from an LTS kernel like 5.10).
+
+## **Kernel compilation**
+Ensure you have the platform-khadas folder ready as documented above.  
+The kernel build process is supported by a script called build-kernel.sh.  
+After compiling the kernel, it will also copy the relevant files into the platform-khadas folder and renew vims.tar.xz.  
+
+**Kernel config**  
+The configuration file can be found in the root of platform-khadas/vims (decompress vims.tar.xz when needed, but never push the decompressed "vims" folder to the platform files).    
+Note, it is copied from there in the kernel build script.
+
+**Before you start compiling**  
+Make sure you have the platform-khadas repo cloned, when present, always do a pull for the latest version.  
+In case you have a new ```vims.tar.xz```, remove the existing vims folder and decompress the new ```vims.tar.xz```
+```
+rm -r vims
+tar xfJ vims.tar.xz
+```
+**Toolchain**  
+You need ```gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu``` for compiling.
+
+**Sample build script**  
+Make sure the current **platform-khadas** folder is referred to as PLATFORMDIR.
+Make sure the current kernel source location is referred to as KERNELDIR.  
+Insert the path to your compiler
+
+``` 
+export ARCH=arm64
+export CROSS_COMPILE=aarch64-linux-gnu-
+export PATH=/opt/toolchains/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/:$PATH
+export INSTALL_MOD_STRIP=1 
+KERNELDIR=<location of cloned linux-mp1>
+PLATFORMDIR=<location of khadas-platform>
+
+cd $KERNELDIR
+echo "Cleaning and preparing .config"
+
+cp $PLATFORMDIR/vims/khadas-vims_defconfig arch/arm64/configs/
+make clean
+
+make khadas-vims_defconfig
+make menuconfig
+cp .config $PLATFORMDIR/vims/khadas-vims_defconfig
+
+echo "Compressing the kernel sources"
+git archive --format=tar.gz --prefix linux-4.9.206/ -v -o $PLATFORMDIR/`date +%Y.%m.%d-%H.%M`-linux4.9.206.tar.gz khadas-vims-4.9.y
+
+echo "Compiling dts, image and modules"
+make -j12 Image dtbs modules
+
+echo "Saving to khadas/vims on NAS"
+cp arch/arm64/boot/Image $PLATFORMDIR/vims/boot
+cp arch/arm64/boot/dts/amlogic/kvim_linux.dtb $PLATFORMDIR/vims/boot/dtb
+cp arch/arm64/boot/dts/amlogic/kvim2_linux.dtb $PLATFORMDIR/vims/boot/dtb
+cp arch/arm64/boot/dts/amlogic/kvim3_linux.dtb $PLATFORMDIR/vims/boot/dtb
+cp arch/arm64/boot/dts/amlogic/kvim3l_linux.dtb $PLATFORMDIR/vims/boot/dtb
+cp arch/arm64/boot/dts/amlogic/kvim3l_primo_linux.dtb $PLATFORMDIR/vims/boot/dtb
+
+kver=`make kernelrelease`-`date +%Y.%m.%d-%H.%M`
+rm $PLATFORMDIR/vims/boot/config*
+cp arch/arm64/configs/khadas-vims_defconfig $PLATFORMDIR/vims/boot/config-${kver}
+rm -r $PLATFORMDIR/vims/lib/modules
+make modules_install ARCH=arm64 INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$PLATFORMDIR/vims/
+
+echo "Compressing $PLATFORMDIR/vims"
+cd $PLATFORMDIR
+tar cvfJ vims.tar.xz ./vims
+``` 
+ 
+Please note the vim, vim2 and vim3 dtb's. You do not need these, VIM1/2/3 are no longer supported. 
+
+## **U-boot compilation**
+This is a little trickier, the compilation was done using the Khadas 'fenix' repo at https:/github.com/khadas/fenix.  
+Follow the instructions for *legacy* u-boot.  
+Mainline u-boot will not work!  
 
 ## **Image support documentation**
 
@@ -114,89 +209,6 @@ vim-specic bluetooth, fan and hdmi scripts
 vim3l asound.state file
 
 
-## **Khadas Kernel**
-
-### **ESS driver**
-  
-The ES90x8Q2M driver sources have been been inserted into the kernel source tree.  
-It compiles, but it is not used as it does not fit the current Khadas audio bus requirements.  
-\<to be completed by a core team member>  
-
-The kernel has been pushed to the https://github.com/volumio/linux-mp1 repo and reflects version 4.9.206.  
-
-### **VIM3L device tree**
-**General VIM dtb's**  
-We still use copies of decompiled dtb files, originally sent to us by Khadas.
-This is unfortunate as it makes changes more difficult/ complex.
-We still need to compile/decompile the original dts files, compare them to the Khadas versions to see where the differences are nowadays and reflect them in the current dts.  
-I guess, after a number of corrections (since start of the VIM porting), differences are very small, it probably only concerns the 192Kbps issue with I2S.
-
-**Adding more USB Audio DSD devices**  
-The Khadas vendor-based 4.9 kernel is not up-to-date with the latest DSD direct capable USB Audio devices.  
-Add those which were not included yet (take them from kernel 5.10).
-
-## **Kernel compilation**
-Ensure you have the platform-khadas folder ready as documented above.  
-The kernel build process is supported by a script called build-kernel.sh.  
-After compiling the kernel, it will also copy the relevant files into the platform-khadas folder and renew vims.tar.xz.  
-
-## **Kernel config**
-The configuration file can be found in the root of platform/vims (or vims.tar.xz).    
-Note, it is copied from there in the kernel build script.
-
-Sample build script
-``` 
-export ARCH=arm64
-export CROSS_COMPILE=aarch64-linux-gnu-
-export PATH=/opt/toolchains/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/:$PATH
-export INSTALL_MOD_STRIP=1
-KERNELDIR=$HOME/linux-4.9.206
-PLATFORMDIR=$PLATFORMDIR
-
-cd $KERNELDIR
-echo "Cleaning and preparing .config"
-
-cp $PLATFORMDIR/vims/khadas-vims_defconfig arch/arm64/configs/
-make clean
-
-make khadas-vims_defconfig
-make menuconfig
-cp .config $PLATFORMDIR/vims/khadas-vims_defconfig
-
-echo "Compressing the kernel sources"
-git archive --format=tar.gz --prefix linux-4.9.206/ -v -o $PLATFORMDIR/`date +%Y.%m.%d-%H.%M`-linux4.9.206.tar.gz khadas-vims-4.9.y
-
-echo "Compiling dts, image and modules"
-make -j12 Image dtbs modules
-
-echo "Saving to khadas/vims on NAS"
-cp arch/arm64/boot/Image $PLATFORMDIR/vims/boot
-cp arch/arm64/boot/dts/amlogic/kvim_linux.dtb $PLATFORMDIR/vims/boot/dtb
-cp arch/arm64/boot/dts/amlogic/kvim2_linux.dtb $PLATFORMDIR/vims/boot/dtb
-cp arch/arm64/boot/dts/amlogic/kvim3_linux.dtb $PLATFORMDIR/vims/boot/dtb
-cp arch/arm64/boot/dts/amlogic/kvim3l_linux.dtb $PLATFORMDIR/vims/boot/dtb
-cp arch/arm64/boot/dts/amlogic/kvim3l_primo_linux.dtb $PLATFORMDIR/vims/boot/dtb
-
-kver=`make kernelrelease`-`date +%Y.%m.%d-%H.%M`
-rm $PLATFORMDIR/vims/boot/config*
-cp arch/arm64/configs/khadas-vims_defconfig $PLATFORMDIR/vims/boot/config-${kver}
-rm -r $PLATFORMDIR/vims/lib/modules
-make modules_install ARCH=arm64 INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$PLATFORMDIR/vims/
-
-echo "Compressing $PLATFORMDIR/vims"
-cd $PLATFORMDIR
-tar cvfJ vims.tar.xz ./vims
-``` 
-
-Note, the above documented copy of the build-kernel.sh script needs to be adopted to the local installation, e.g. folder path of the kernel sources (KERNELDIR) & folder path of the platform-khadas files (PLATFORMDIR).  
-Please note the vim, vim2 and vim3 dtb's.  
-Don't omit to copy them just because you see no use for them with the mp1!  
-They are used for the VIM1/VIM2/VIM3 community portings!!!
-
-## **U-boot compilation**
-This is a little trickier, the compilation was done using the Khadas 'fenix' repo at https:/github.com/khadas/fenix.  
-Follow the instructions for *legacy* u-boot.  
-Mainline u-boot will not work!  
 
 
 <br />
