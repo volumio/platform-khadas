@@ -51,13 +51,8 @@ Though not absolutely necessary for normal work, it is a **must** when testing k
 ```
 I created a short cable with an RCA socket and used a 100R resistor with the signal line (pin 13) just to keep on the safe side.  
 Works perfectly well with spdif-in on my headphone and main amplifiers.
-<br />
-<br />
-<sub>
 
-|Date|Author|Change
-|---|---|---|
-|25.02.2023|gkkpch|Merged platform-mp into platform-khadas
+
 
 
 

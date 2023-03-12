@@ -143,5 +143,6 @@ $ git push
 |24.02.2023|gkkpch|Kernel: mmc: meson-gx: fix SDIO mode if cap_sdio_irq isn't set
 |||Kernel: arm64: dts: meson-gx: Make mmc host controller interrupts level-sensitive
 |||mp2 build: does not need rc.local brcmfmac bypass now with the SDIO fixes
+|12.03.2023|gkkpch|vim1s build: fixed ```/boot/extlinux/extlinux.conf``` issue with missing partitiontype "generic"
 
 
