@@ -37,6 +37,85 @@ These changes will be removed each time the ```custom-kernel.sh``` script (see b
 In case you do need modifications, save them on the platform folder and re-apply them after the custom script does its initial "git pull".
 For an example, see the re-application of the kernel configuration file in ```custom-kernel-mp1.sh```.
 
+## **Kernel configuration prerequisites for Khadas board**
+Though the inital configuration  is based on what khadas delivers, there some configuration parameters to consider, which were modified/added for Volumio.  
+This list is not complete, nevertheless consider it as a checklist to ensure the minimum requirements for Volumio are met.  
+Specifically for VIM1S: note the configuration parameters which are explicitly **NOT SET**.
+
+**Deprecaterd ARMV8 instruction handling**
+- CONFIG_ARMV8_DEPRECATED=y
+- CONFIG_SWP_EMULATION=y
+- CONFIG_CP15_BARRIER_EMULATION=y
+- CONFIG_SETEND_EMULATION=y
+
+**Audio**
+- CONFIG_SND_PROC_FS=y
+- CONFIG_SND_ALOOP=m
+- CONFIG_SND_USB_AUDIO=y
+
+**Various filesystems**
+
+- CONFIG_EXT2_FS=y
+- CONFIG_EXT3_FS=y
+- CONFIG_EXT3_FS_POSIX_ACL=y  
+recommended
+- CONFIG_EXT3_FS_SECURITY=y  
+recommended 
+- CONFIG_EXT4_FS=y
+- CONFIG_EXT4_USE_FOR_EXT2=y
+- CONFIG_EXT4_FS_POSIX_ACL=y
+- CONFIG_EXT4_FS_SECURITY=y
+
+- CONFIG_EXFAT_FS=m
+- CONFIG_EXFAT_DEFAULT_IOCHARSET="utf8"
+- CONFIG_AUTOFS4_FS=y
+
+
+
+**OverlayFS filesystem**
+- CONFIG_OVERLAY_FS=m
+- \# **CONFIG_OVERLAY_FS_REDIRECT_DIR is not set**
+- CONFIG_OVERLAY_FS_REDIRECT_ALWAYS_FOLLOW=y
+- \# **CONFIG_OVERLAY_FS_INDEX is not set**
+- \# **CONFIG_OVERLAY_FS_XINO_AUTO is not set**
+- \# **CONFIG_OVERLAY_FS_METACOPY is not set**
+
+
+
+**SquashFS filesystem**
+- CONFIG_SQUASHFS=m    
+'m' is minimum, as it will be "modprob-ed" in initrd"
+- CONFIG_SQUASHFS_FILE_CACHE=y
+- \# **CONFIG_SQUASHFS_FILE_DIRECT is not set**
+- CONFIG_SQUASHFS_DECOMP_SINGLE=y
+- \# **CONFIG_SQUASHFS_DECOMP_MULTI is not set**
+- \# **CONFIG_SQUASHFS_DECOMP_MULTI_PERCPU is not set**
+- \# **CONFIG_SQUASHFS_XATTR is not set**
+- CONFIG_SQUASHFS_ZLIB=y
+- CONFIG_SQUASHFS_LZ4=y
+- CONFIG_SQUASHFS_LZO=y
+- CONFIG_SQUASHFS_XZ=y
+- CONFIG_SQUASHFS_ZSTD=y
+- \# **CONFIG_SQUASHFS_4K_DEVBLK_SIZE is not set**
+- \# **CONFIG_SQUASHFS_EMBEDDED is not set**
+
+**DOS/FAT/NT Filesystems**
+
+- CONFIG_FAT_FS=y
+- CONFIG_MSDOS_FS=y
+- CONFIG_VFAT_FS=y
+- CONFIG_FAT_DEFAULT_CODEPAGE=437
+- CONFIG_FAT_DEFAULT_IOCHARSET="iso8859-1"
+- \# CONFIG_FAT_DEFAULT_UTF8 is not set
+- \# CONFIG_NTFS_FS is not set
+- CONFIG_NTFS3_FS=y
+
+**Pseudo filesystems**
+- CONFIG_PROC_FS=y
+
+
+
+
 ## **How to build the Khadas kernel and u-boot for Volumio?**
 
 Install the essentials
