@@ -16,6 +16,10 @@ git pull
 [ -e ${DEVICE} ] && rm -r ${DEVICE} && tar xfJ ${DEVICE}.tar.xz 
 cd ..
 
+echo "Backup hwpacks to vim1s folder"
+cp -R ${FENIX}/archives/hwpacks/wlan-firmware $PLATFORM/${DEVICE}/hwpacks
+cp -R ${FENIX}/archives/hwpacks/bluez $PLATFORM/${DEVICE}/hwpacks
+
 echo "Unpacking boot, lib and dtb from Khadas .deb file..."  
 dpkg-deb -R $PLATFORM/kernelnew/khadas/debs/${DEVICE}/linux-image*.deb /tmp/linux-image
 cp /tmp/linux-image/boot/vmlinuz-* $PLATFORM/${DEVICE}/boot/Image

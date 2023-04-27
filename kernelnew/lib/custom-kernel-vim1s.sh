@@ -61,5 +61,4 @@ cp build/images/debs/$VERSION/VIM1S/linux-dtb*.deb $PLATFORM/kernelnew/khadas/de
 cp build/images/debs/$VERSION/VIM1S/linux-headers*.deb $PLATFORM/kernelnew/khadas/debs/${DEVICE}/
 cp build/images/debs/$VERSION/VIM1S/linux-image*.deb $PLATFORM/kernelnew/khadas/debs/${DEVICE}/
 
-
 echo "Done..."
