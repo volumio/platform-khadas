@@ -1,0 +1,403 @@
+From bcf7ba9d31974ac846e3d3bbb9c6f2142e955a9b Mon Sep 17 00:00:00 2001
+From: paolo <paolo.sabatino@gmail.com>
+Date: Sun, 16 Apr 2023 13:10:54 +0000
+Subject: [PATCH 1/2] fix compilation issues in kernel 4.9
+
+---
+ drivers/amlogic/media/common/rdma/rdma_mgr.c  | 11 +--
+ .../amlogic/media/deinterlace/deinterlace.c   |  4 +-
+ .../amlogic/media/enhancement/amvecm/amvecm.c | 67 ++++++++-----------
+ drivers/amlogic/media/frame_sync/tsync.c      | 14 ++--
+ .../vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c     |  2 +-
+ .../decoder/utils/frame_check.c               |  2 +-
+ drivers/amlogic/mtd/mtd_driver.c              |  2 +-
+ drivers/amlogic/mtd/rsv_manage.c              | 21 +++---
+ .../usb/dwc_otg/310/dwc_otg_pcd_intr.c        |  3 +-
+ drivers/gpu/arm/utgard/common/mali_session.c  |  4 +-
+ drivers/power/Kconfig                         |  2 +-
+ init/main.c                                   |  2 +
+ mm/hugetlb.c                                  |  2 +-
+ 13 files changed, 62 insertions(+), 74 deletions(-)
+
+diff --git a/drivers/amlogic/media/common/rdma/rdma_mgr.c b/drivers/amlogic/media/common/rdma/rdma_mgr.c
+index cf15d3adf26e..1bc11653e008 100644
+--- a/drivers/amlogic/media/common/rdma/rdma_mgr.c
++++ b/drivers/amlogic/media/common/rdma/rdma_mgr.c
+@@ -463,13 +463,14 @@ int rdma_config(int handle, int trigger_type)
+ 		ret = 1;
+ 		ins->rdma_write_count = 0;
+ 	} else if (ins->rdma_item_count <= 0 || trigger_type == 0) {
+-		if (trigger_type == RDMA_TRIGGER_MANUAL)
++		if (trigger_type == RDMA_TRIGGER_MANUAL) {
+ 			WRITE_VCBUS_REG(RDMA_ACCESS_MAN,
+ 				READ_VCBUS_REG(RDMA_ACCESS_MAN) & (~1));
+-			if (debug_flag & 2) {
+-				pr_info("%s: trigger_type %d : %d\r\n",
+-				__func__, trigger_type, ins->rdma_item_count);
+-			}
++		}
++		if (debug_flag & 2) {
++			pr_info("%s: trigger_type %d : %d\r\n",
++			__func__, trigger_type, ins->rdma_item_count);
++		}
+ 		WRITE_VCBUS_REG_BITS(
+ 			ins->rdma_regadr->trigger_mask_reg,
+ 			0, ins->rdma_regadr->trigger_mask_reg_bitpos,
+diff --git a/drivers/amlogic/media/deinterlace/deinterlace.c b/drivers/amlogic/media/deinterlace/deinterlace.c
+index d5b086c1492b..a708b081aaf6 100644
+--- a/drivers/amlogic/media/deinterlace/deinterlace.c
++++ b/drivers/amlogic/media/deinterlace/deinterlace.c
+@@ -4505,8 +4505,8 @@ static irqreturn_t post_irq(int irq, void *dev_instance)
+ 
+ 	data32 &= 0x3fffffff;
+ 	if ((data32 & 4) == 0) {
+-	if (di_dbg_mask&8)
+-		pr_info("irq[%d]post write undone.\n", irq);
++		if (di_dbg_mask&8)
++			pr_info("irq[%d]post write undone.\n", irq);
+ 		return IRQ_HANDLED;
+ 	}
+ 	if ((post_wr_en && post_wr_support) && (data32&0x4)) {
+diff --git a/drivers/amlogic/media/enhancement/amvecm/amvecm.c b/drivers/amlogic/media/enhancement/amvecm/amvecm.c
+index cfa82dfff7c0..a99e3aa10005 100644
+--- a/drivers/amlogic/media/enhancement/amvecm/amvecm.c
++++ b/drivers/amlogic/media/enhancement/amvecm/amvecm.c
+@@ -1816,9 +1816,9 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(dnlp_scurv_low_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(dnlp_scurv_low_copy[i], i, stemp, 4, 10);
++
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1835,9 +1835,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(dnlp_scurv_mid1_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(dnlp_scurv_mid1_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1854,9 +1853,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(dnlp_scurv_mid2_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(dnlp_scurv_mid2_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1873,9 +1871,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(dnlp_scurv_hgh1_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(dnlp_scurv_hgh1_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1892,9 +1889,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(dnlp_scurv_hgh2_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(dnlp_scurv_hgh2_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1911,9 +1907,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 49; i++)
+-					d_convert_str(gain_var_lut49_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(gain_var_lut49_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1930,9 +1925,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 48; i++)
+-					d_convert_str(wext_gain_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(wext_gain_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else {
+ 				if (kstrtoul(parm[2], 10, &val) < 0)
+ 					goto free_buf;
+@@ -1949,9 +1943,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(ve_dnlp_tgt_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(ve_dnlp_tgt_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		} else if (!strcmp(parm[1], "GmScurve")) {
+@@ -1961,9 +1954,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(GmScurve_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(GmScurve_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		} else if (!strcmp(parm[1], "clash_curve")) {
+@@ -1973,9 +1965,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(clash_curve_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(clash_curve_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		} else if (!strcmp(parm[1], "clsh_scvbld")) {
+@@ -1985,9 +1976,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(clsh_scvbld_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(clsh_scvbld_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		} else if (!strcmp(parm[1], "blkwht_ebld")) {
+@@ -1997,9 +1987,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 65; i++)
+-					d_convert_str(blkwht_ebld_copy[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(blkwht_ebld_copy[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		} else if (!strcmp(parm[1], "vpp_histgram")) {
+@@ -2009,10 +1998,8 @@ static ssize_t amvecm_dnlp_debug_store(struct class *cla,
+ 				goto free_buf;
+ 			} else if (!strcmp(parm[2], "all")) {
+ 				for (i = 0; i < 64; i++)
+-					d_convert_str(
+-					vpp_hist_param.vpp_histgram[i],
+-						i, stemp, 4, 10);
+-					pr_info("%s\n", stemp);
++					d_convert_str(vpp_hist_param.vpp_histgram[i], i, stemp, 4, 10);
++				pr_info("%s\n", stemp);
+ 			} else
+ 				pr_info("error cmd\n");
+ 		}
+diff --git a/drivers/amlogic/media/frame_sync/tsync.c b/drivers/amlogic/media/frame_sync/tsync.c
+index c41279da9853..dac333d0bfc6 100644
+--- a/drivers/amlogic/media/frame_sync/tsync.c
++++ b/drivers/amlogic/media/frame_sync/tsync.c
+@@ -627,14 +627,14 @@ static int tsync_mode_switch(int mode, unsigned long diff_pts, int jump_pts)
+ 		} else {
+ 			/* / */
+ 		}
+-		if (tsync_mode != old_tsync_mode
+-			|| tsync_av_mode != old_tsync_av_mode)
+-			pr_info("mode changes:tsync_mode:%c->%c,state:%c->%c,",
+-				 VA[old_tsync_mode], VA[tsync_mode],
++		if (tsync_mode != old_tsync_mode || tsync_av_mode != old_tsync_av_mode) {
++			pr_info("mode changes:tsync_mode:%c->%c,state:%c->%c,", 
++				VA[old_tsync_mode], VA[tsync_mode],
+ 				 old_tsync_av_mode, tsync_av_mode);
+-			pr_info("debugcnt=0x%x,diff_pts=%lu\n",
+-				debugcnt,
+-				diff_pts);
++		}
++		pr_info("debugcnt=0x%x,diff_pts=%lu\n",
++			debugcnt,
++			diff_pts);
+ 		return 0;
+ 	}
+ 
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index d545885b9346..3893d5cd3597 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -559,7 +559,7 @@ static int set_disp_mode_auto(void)
+ 
+ 
+ 	if (strstr(hdmitx_device.fmt_attr,"now") != NULL){
+-		memcpy(strstr(hdmitx_device.fmt_attr,"now"), " ", 3);
++		memcpy(strstr(hdmitx_device.fmt_attr,"now"), " ", 2);
+ 	}
+ 	hdev->cur_VIC = HDMI_Unknown;
+ /* if vic is HDMI_Unknown, hdmitx_set_display will disable HDMI */
+diff --git a/drivers/amlogic/media_modules/frame_provider/decoder/utils/frame_check.c b/drivers/amlogic/media_modules/frame_provider/decoder/utils/frame_check.c
+index 20a7c380ee81..c81a947d9339 100644
+--- a/drivers/amlogic/media_modules/frame_provider/decoder/utils/frame_check.c
++++ b/drivers/amlogic/media_modules/frame_provider/decoder/utils/frame_check.c
+@@ -287,7 +287,7 @@ static int write_yuv_work(struct pic_check_mgr_t *mgr)
+ static int write_crc_work(struct pic_check_mgr_t *mgr)
+ {
+ 	unsigned int wr_size;
+-	char *crc_buf, crc_tmp[64*30];
++	char *crc_buf, crc_tmp[32*30];
+ 	mm_segment_t old_fs;
+ 	struct pic_check_t *check = &mgr->pic_check;
+ 
+diff --git a/drivers/amlogic/mtd/mtd_driver.c b/drivers/amlogic/mtd/mtd_driver.c
+index 5f5716711b5e..12917aaf9766 100644
+--- a/drivers/amlogic/mtd/mtd_driver.c
++++ b/drivers/amlogic/mtd/mtd_driver.c
+@@ -285,7 +285,7 @@ static int mtd_nand_remove(struct platform_device *pdev)
+ 		if (aml_chip) {
+ 			mtd = aml_chip->mtd;
+ 			if (mtd) {
+-				nand_release(mtd);
++				nand_release(&aml_chip->chip);
+ 				kfree(mtd);
+ 			}
+ 			kfree(aml_chip);
+diff --git a/drivers/amlogic/mtd/rsv_manage.c b/drivers/amlogic/mtd/rsv_manage.c
+index 79699363a573..ff581b1276ca 100644
+--- a/drivers/amlogic/mtd/rsv_manage.c
++++ b/drivers/amlogic/mtd/rsv_manage.c
+@@ -216,14 +216,13 @@ int aml_nand_scan_shipped_bbt(struct mtd_info *mtd)
+ 					NAND_CMD_READ0,
+ 					0x00, aml_chip->page_addr, i);
+ 
+-			if (!aml_chip->aml_nand_wait_devready(aml_chip, i))
+-				pr_info("%s, %d,selected chip%d not ready\n",
+-					__func__, __LINE__, i);
++				if (!aml_chip->aml_nand_wait_devready(aml_chip, i))
++					pr_info("%s, %d,selected chip%d not ready\n",
++						__func__, __LINE__, i);
+ 
+ 				if (aml_chip->ops_mode & AML_CHIP_NONE_RB)
+-					chip->cmd_ctrl(mtd,
+-					NAND_CMD_READ0 & 0xff,
+-					NAND_NCE | NAND_CLE | NAND_CTRL_CHANGE);
++					chip->cmd_ctrl(mtd, NAND_CMD_READ0 & 0xff, NAND_NCE | NAND_CLE | NAND_CTRL_CHANGE);
++
+ 				udelay(2);
+ 				aml_chip->aml_nand_command(aml_chip,
+ 					NAND_CMD_TWOPLANE_READ1,
+@@ -263,14 +262,12 @@ int aml_nand_scan_shipped_bbt(struct mtd_info *mtd)
+ 					aml_chip->page_addr, i);
+ 				udelay(2);
+ 
+-			if (!aml_chip->aml_nand_wait_devready(aml_chip, i))
+-				pr_info("%s, %d,selected chip%d not ready\n",
+-					__func__, __LINE__, i);
++				if (!aml_chip->aml_nand_wait_devready(aml_chip, i))
++					pr_info("%s, %d,selected chip%d not ready\n", __func__, __LINE__, i);
+ 
+ 				if (aml_chip->ops_mode & AML_CHIP_NONE_RB)
+-					chip->cmd_ctrl(mtd,
+-					NAND_CMD_READ0 & 0xff,
+-					NAND_NCE | NAND_CLE | NAND_CTRL_CHANGE);
++					chip->cmd_ctrl(mtd, NAND_CMD_READ0 & 0xff, NAND_NCE | NAND_CLE | NAND_CTRL_CHANGE);
++
+ 				udelay(2);
+ 
+ 			if (aml_chip->mfr_type  == NAND_MFR_SANDISK) {
+diff --git a/drivers/amlogic/usb/dwc_otg/310/dwc_otg_pcd_intr.c b/drivers/amlogic/usb/dwc_otg/310/dwc_otg_pcd_intr.c
+index 3382a6a1260d..4c9809fc9d36 100644
+--- a/drivers/amlogic/usb/dwc_otg/310/dwc_otg_pcd_intr.c
++++ b/drivers/amlogic/usb/dwc_otg/310/dwc_otg_pcd_intr.c
+@@ -4291,8 +4291,9 @@ do { \
+ 							}
+ 
+ 							if (pcd->ep0state == EP0_IDLE) {
+-								if (doepint_temp.b.sr)
++								if (doepint_temp.b.sr) {
+ 									CLEAR_OUT_EP_INTR(core_if, epnum, sr);
++								}
+ 
+ 									/* Delay is needed for core to update setup
+ 									 * packet count from 3 to 2 after receiving
+diff --git a/drivers/gpu/arm/utgard/common/mali_session.c b/drivers/gpu/arm/utgard/common/mali_session.c
+index 11e4cf404093..275807d7c40a 100755
+--- a/drivers/gpu/arm/utgard/common/mali_session.c
++++ b/drivers/gpu/arm/utgard/common/mali_session.c
+@@ -130,9 +130,9 @@ void mali_session_memory_tracking(_mali_osk_print_ctx *print_ctx)
+ 	MALI_SESSION_FOREACH(session, tmp, link) {
+ 		ttask = pid_task(find_vpid(session->pid), PIDTYPE_PID);
+ 		if (ttask)
+-			strncpy(task_comm, ttask->comm, sizeof(ttask->comm));
++			strncpy(task_comm, ttask->comm, sizeof(task_comm));
+ 		else
+-			strncpy(task_comm, task_default, sizeof(task_default));
++			strncpy(task_comm, task_default, sizeof(task_comm));
+ #ifdef MALI_MEM_SWAP_TRACKING
+ 		_mali_osk_ctxprintf(print_ctx, "  %-25s  %-10u %-25s %-10u  %-15u  %-15u  %-10u  %-10u %-10u\n",
+ 				    session->comm, session->pid, task_comm,
+diff --git a/drivers/power/Kconfig b/drivers/power/Kconfig
+index c0e513c9d8ce..02d6e229c07f 100644
+--- a/drivers/power/Kconfig
++++ b/drivers/power/Kconfig
+@@ -10,7 +10,7 @@ config CHARGER_BQ25700
+ 
+ config BATTERY_CW2015
+ 	tristate "BATTERY_CW2015 Battery driver"
+-	depends on I2C]
++	depends on I2C
+ 	help
+ 		If you say yes here you will get support for the battery of CW2015.
+ 		This driver can give support for CW2015 Battery Interface.
+diff --git a/init/main.c b/init/main.c
+index 8ed9fb3d6ddd..23c0993bfb7f 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -490,6 +490,8 @@ asmlinkage __visible void __init start_kernel(void)
+ 	char *command_line;
+ 	char *after_dashes;
+ 
++	pr_notice("start_kernel!");
++
+ 	set_task_stack_end_magic(&init_task);
+ 	smp_setup_processor_id();
+ 	debug_objects_early_init();
+diff --git a/mm/hugetlb.c b/mm/hugetlb.c
+index b469d099dc5f..8fe6ba6531a7 100644
+--- a/mm/hugetlb.c
++++ b/mm/hugetlb.c
+@@ -3846,7 +3846,7 @@ u32 hugetlb_fault_mutex_hash(struct hstate *h, struct address_space *mapping,
+ 	key[0] = (unsigned long) mapping;
+ 	key[1] = idx;
+ 
+-	hash = jhash2((u32 *)&key, sizeof(key)/sizeof(u32), 0);
++	hash = jhash2((u32 *)&key, sizeof(key)/(sizeof(u32)), 0);
+ 
+ 	return hash & (num_fault_mutexes - 1);
+ }
+-- 
+2.25.1
+
