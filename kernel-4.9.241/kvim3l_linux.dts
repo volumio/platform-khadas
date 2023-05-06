@@ -1768,7 +1768,7 @@
 	lcd_cpu-gpios = <&gpio_expander 0 GPIO_ACTIVE_HIGH
 					&gpio_expander 1 GPIO_ACTIVE_HIGH>;
 	lcd_cpu_gpio_names = "GPIO_EXPANDER_0","GPIO_EXPANDER_1";
-	status = "disabled";
+	status = "okay";
 };
 
 &gpu{
