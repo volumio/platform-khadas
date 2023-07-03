@@ -1,0 +1,127 @@
+diff --git a/sound/usb/card.h b/sound/usb/card.h
+index 111b0f00..cbcf2158 100644
+--- a/sound/usb/card.h
++++ b/sound/usb/card.h
+@@ -31,6 +31,7 @@ struct audioformat {
+ 	struct snd_pcm_chmap_elem *chmap; /* (optional) channel map */
+ 	bool dsd_dop;			/* add DOP headers in case of DSD samples */
+ 	bool dsd_bitrev;		/* reverse the bits of each DSD sample */
++	bool dsd_raw;			/* altsetting is raw DSD */
+ };
+ 
+ struct snd_usb_substream;
+diff --git a/sound/usb/endpoint.c b/sound/usb/endpoint.c
+index b8044c60..08d23269 100644
+--- a/sound/usb/endpoint.c
++++ b/sound/usb/endpoint.c
+@@ -638,7 +638,21 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
+ 
+ 	ep->datainterval = fmt->datainterval;
+ 	ep->stride = frame_bits >> 3;
+-	ep->silence_value = pcm_format == SNDRV_PCM_FORMAT_U8 ? 0x80 : 0;
++
++	switch (pcm_format) {
++	case SNDRV_PCM_FORMAT_U8:
++		ep->silence_value = 0x80;
++		break;
++	case SNDRV_PCM_FORMAT_DSD_U8:
++	case SNDRV_PCM_FORMAT_DSD_U16_LE:
++	case SNDRV_PCM_FORMAT_DSD_U32_LE:
++	case SNDRV_PCM_FORMAT_DSD_U16_BE:
++	case SNDRV_PCM_FORMAT_DSD_U32_BE:
++		ep->silence_value = 0x69;
++		break;
++	default:
++		ep->silence_value = 0;
++	}
+ 
+ 	/* assume max. frequency is 25% higher than nominal */
+ 	ep->freqmax = ep->freqn + (ep->freqn >> 2);
+diff --git a/sound/usb/format.c b/sound/usb/format.c
+index 2c44386e..af7bccdb 100644
+--- a/sound/usb/format.c
++++ b/sound/usb/format.c
+@@ -63,9 +63,11 @@ static u64 parse_audio_format_i_type(struct snd_usb_audio *chip,
+ 		sample_width = fmt->bBitResolution;
+ 		sample_bytes = fmt->bSubslotSize;
+ 
+-		if (format & UAC2_FORMAT_TYPE_I_RAW_DATA)
+-			pcm_formats |= SNDRV_PCM_FMTBIT_SPECIAL;
+-
++		if (format & UAC2_FORMAT_TYPE_I_RAW_DATA) {
++           pcm_formats |= SNDRV_PCM_FMTBIT_SPECIAL;
++			/* flag potentially raw DSD capable altsettings */
++			fp->dsd_raw = true;
++		}
+ 		format <<= 1;
+ 		break;
+ 	}
+diff --git a/sound/usb/quirks.c b/sound/usb/quirks.c
+index da9fc08b..eae690e1 100644
+--- a/sound/usb/quirks.c
++++ b/sound/usb/quirks.c
+@@ -1354,19 +1354,44 @@ u64 snd_usb_interface_dsd_format_quirks(struct snd_usb_audio *chip,
+ 	/* XMOS based USB DACs */
+ 	switch (chip->usb_id) {
+ 	case USB_ID(0x20b1, 0x3008): /* iFi Audio micro/nano iDSD */
++	case USB_ID(0x1511, 0x0037): /* AURALiC VEGA */
++	case USB_ID(0x20b1, 0x0002): /* Wyred 4 Sound DAC-2 DSD */
++	case USB_ID(0x20b1, 0x2004): /* Matrix Audio X-SPDIF 2 */
+ 	case USB_ID(0x20b1, 0x2008): /* Matrix Audio X-Sabre */
+ 	case USB_ID(0x20b1, 0x300a): /* Matrix Audio Mini-i Pro */
+ 	case USB_ID(0x22d9, 0x0416): /* OPPO HA-1 */
++	case USB_ID(0x22d9, 0x0436): /* OPPO Sonica */
++	case USB_ID(0x22d9, 0x0461): /* OPPO UDP-205 */
++	case USB_ID(0x2522, 0x0012): /* LH Labs VI DAC Infinity */
+ 	case USB_ID(0x2772, 0x0230): /* Pro-Ject Pre Box S2 Digital */
+ 		if (fp->altsetting == 2)
+ 			return SNDRV_PCM_FMTBIT_DSD_U32_BE;
+ 		break;
+ 
++	case USB_ID(0x152a, 0x85de): /* SMSL D1 DAC */
++	case USB_ID(0x16d0, 0x09dd): /* Encore mDSD */
++	case USB_ID(0x0d8c, 0x0316): /* Hegel HD12 DSD */
++	case USB_ID(0x16b0, 0x06b2): /* NuPrime DAC-10 */
++	case USB_ID(0x16d0, 0x0733): /* Furutech ADL Stratos */
++	case USB_ID(0x16d0, 0x09db): /* NuPrime Audio DAC-9 */
++	case USB_ID(0x1db5, 0x0003): /* Bryston BDA3 */
+ 	case USB_ID(0x20b1, 0x000a): /* Gustard DAC-X20U */
++	case USB_ID(0x20b1, 0x2005): /* Denafrips Ares DAC */
+ 	case USB_ID(0x20b1, 0x2009): /* DIYINHK DSD DXD 384kHz USB to I2S/DSD */
+ 	case USB_ID(0x20b1, 0x2023): /* JLsounds I2SoverUSB */
++	case USB_ID(0x20b1, 0x3021): /* Eastern El. MiniMax Tube DAC Supreme */
+ 	case USB_ID(0x20b1, 0x3023): /* Aune X1S 32BIT/384 DSD DAC */
++	case USB_ID(0x20b1, 0x302d): /* Unison Research Unico CD Due */
++	case USB_ID(0x20b1, 0x307b): /* CH Precision C1 DAC */
++	case USB_ID(0x20b1, 0x3086): /* Singxer F-1 converter board */
++	case USB_ID(0x22d9, 0x0426): /* OPPO HA-2 */
++	case USB_ID(0x22e1, 0xca01): /* HDTA Serenade DSD */
++	case USB_ID(0x249c, 0x9326): /* M2Tech Young MkIII */
+ 	case USB_ID(0x2616, 0x0106): /* PS Audio NuWave DAC */
++	case USB_ID(0x2622, 0x0041): /* Audiolab M-DAC+ */
++	case USB_ID(0x27f7, 0x3002): /* W4S DAC-2v2SE */
++	case USB_ID(0x29a2, 0x0086): /* Mutec MC3+ USB */
++	case USB_ID(0x6b42, 0x0042): /* MSB Technology */
+ 		if (fp->altsetting == 3)
+ 			return SNDRV_PCM_FMTBIT_DSD_U32_BE;
+ 		break;
+@@ -1386,5 +1411,20 @@ u64 snd_usb_interface_dsd_format_quirks(struct snd_usb_audio *chip,
+ 			return SNDRV_PCM_FMTBIT_DSD_U32_BE;
+ 	}
+ 
++	/* Mostly generic method to detect many DSD-capable implementations -
++	 * from XMOS/Thesycon
++	 */
++	switch (USB_ID_VENDOR(chip->usb_id)) {
++	  case 0x20b1:  /* XMOS based devices */
++	  case 0x152a:  /* Thesycon devices */
++	  case 0x25ce:  /* Mytek devices */
++		if (fp->dsd_raw) {
++			return SNDRV_PCM_FMTBIT_DSD_U32_BE;
++		}
++		break;
++	 default:
++		break;
++	}
+ 	return 0;
+ }

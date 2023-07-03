@@ -1,0 +1,25 @@
+From 93526811e75761562b84c8407a4b6e44dea64de9 Mon Sep 17 00:00:00 2001
+From: paolo <paolo.sabatino@gmail.com>
+Date: Fri, 19 May 2023 11:04:54 +0200
+Subject: [PATCH] force amlogic tdm audio rates to 44100Hz and upward
+
+---
+ sound/soc/amlogic/auge/tdm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/soc/amlogic/auge/tdm.c b/sound/soc/amlogic/auge/tdm.c
+index 00c825d6..fbad4bf2 100644
+--- a/sound/soc/amlogic/auge/tdm.c
++++ b/sound/soc/amlogic/auge/tdm.c
+@@ -1413,7 +1413,7 @@ static struct snd_soc_dai_ops aml_dai_tdm_ops = {
+ 	.mute_stream = aml_dai_tdm_mute_stream,
+ };
+ 
+-#define AML_DAI_TDM_RATES		(SNDRV_PCM_RATE_8000_384000)
++#define AML_DAI_TDM_RATES              (SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_64000 | SNDRV_PCM_RATE_88200 | SNDRV_PCM_RATE_96000 | SNDRV_PCM_RATE_176400 | SNDRV_PCM_RATE_192000)
+ #define AML_DAI_TDM_FORMATS		(SNDRV_PCM_FMTBIT_S16_LE |\
+ 		SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S32_LE)
+ 
+-- 
+2.25.1
+
