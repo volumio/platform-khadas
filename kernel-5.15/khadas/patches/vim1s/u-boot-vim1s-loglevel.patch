@@ -1,0 +1,21 @@
+diff --git a/board/khadas/configs/kvim1s.h b/board/khadas/configs/kvim1s.h
+index 93028651f6..866df424a3 100644
+--- a/board/khadas/configs/kvim1s.h
++++ b/board/khadas/configs/kvim1s.h
+@@ -123,7 +123,6 @@
+     "bootfile=\0"\
+     "fdtfile=amlogic/" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
+     CONFIG_EXTRA_ENV_SETTINGS_BASE \
+-        SILENT \
+         "dv_fw_addr=0xa00000\0"\
+         "otg_device=1\0" \
+         "panel_type=lcd_1\0" \
+@@ -162,7 +161,7 @@
+         "initargs="\
+             "rootflags=data=writeback rw rootfstype=ext4" CONFIG_KNL_LOG_LEVEL "no_console_suspend fsck.repair=yes net.ifnames=0 "\
+             "ramoops.pstore_en=1 ramoops.record_size=0x8000 ramoops.console_size=0x4000 loop.max_part=4 scramble_reg=0x0xfe02e030 khadas_board=VIM1S boot_source=${boot_source} "\
+-			"cma_first_wm_low=on " KERNL_LOGLEVEL \
++			"cma_first_wm_low=on " \
+             "\0"\
+         "nfs_boot="\
+             "dhcp;"\

@@ -1,0 +1,6 @@
+/dts-v1/;
+/plugin/;
+
+&{/auge_sound} {
+            aml-audio-card,name = "AML-AUGESOUND-515";
+};
