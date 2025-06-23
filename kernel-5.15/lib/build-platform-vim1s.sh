@@ -20,6 +20,8 @@ echo "Backup hwpacks folder"
 mkdir -p $PLATFORM/vims-5.15/hwpacks/
 cp -R ${FENIX}/archives/hwpacks/wlan-firmware $PLATFORM/vims-5.15/hwpacks/
 cp -R ${FENIX}/archives/hwpacks/bluez $PLATFORM/vims-5.15/hwpacks/
+mkdir -p $PLATFORM/vims-5.15/hwpacks/video-firmware/Amlogic/${DEVICE}
+cp -R ${FENIX}/archives/hwpacks/video-firmware/Amlogic/${DEVICE^^}/* $PLATFORM/vims-5.15/hwpacks/video-firmware/Amlogic/${DEVICE}
 
 echo "Unpacking boot, lib and dtb from Khadas .deb file..."  
 dpkg-deb -R $PLATFORM/kernel-5.15/khadas/debs/common/linux-image*.deb /tmp/linux-image
@@ -38,20 +40,16 @@ cp -R /tmp/khadas-dt-overlays/boot/overlays/* $PLATFORM/vims-5.15/boot/dtb/amlog
 echo "Compile renamesound.dts overlay (which, when used, renames AML_AGUGESOUND to AML_AUGESOUND-515"
 dtc -O dtb -o $PLATFORM/vims-5.15/boot/dtb/amlogic/kvim1s.dtb.overlays/renamesound.dtbo $PLATFORM/kernel-5.15/khadas/patches/${DEVICE}/renamesound.dts
 
-echo "Copy Khadas-specific firmware with it"
-mkdir -p $PLATFORM/vims-5.15/lib/firmware
-cp -R $PLATFORM/vims-5.15/hwpacks/wlan-firmware/* $PLATFORM/vims-5.15/lib/firmware/
-
 echo "Populate ${PLATFORM} with necessary u-boot files"
 dpkg-deb -R $PLATFORM/kernel-5.15/khadas/debs/${DEVICE}/linux-u-boot* /tmp/u-boot
 mkdir -p $PLATFORM/vims-5.15/u-boot/${DEVICE}
 cp /tmp/u-boot/usr/lib/u-boot/* $PLATFORM/vims-5.15/u-boot/${DEVICE}/
 
+cd $PLATFORM
+tar cvfJ vims-5.15.tar.xz ./vims-5.15
+
 rm -r /tmp/u-boot
 rm -r /tmp/linux-image
 rm -r /tmp/khadas-dt-overlays
-
-cd $PLATFORM
-tar cvfJ vims-5.15.tar.xz ./vims-5.15
 
 echo "Done"
